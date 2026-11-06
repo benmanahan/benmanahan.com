@@ -1,0 +1,18 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/paths';
+import Arrow from './Arrow.astro';
+interface Props { project: CollectionEntry<'projects'> }
+const { project: { data: project } } = Astro.props;
+const thumbnail = project.thumbnail ?? project.hero;
+---
+<a class="project-card color-reveal" href={withBase(`projects/${project.slug}/`)} aria-label={`${project.projectId}: ${project.title} — view project`}>
+  <div class="project-image">
+    {!thumbnail && <div class="project-tile-placeholder" aria-hidden="true"><span class="mono">{project.category.join(' / ')}</span><span class="project-tile-number">{project.projectId.replace('BM-', '')}</span></div>}
+    {thumbnail && <img class:list={['project-photo', { 'project-photo--rotated': Math.abs(project.imageRotation) === 90 }]} style={`object-fit: ${project.thumbnailFit}; --image-rotation: ${project.imageRotation}deg; --image-scale: ${project.thumbnailZoom ?? (Math.abs(project.imageRotation) === 90 ? 1.2 : 1)};`} src={withBase(thumbnail)} alt={project.imageAlt} width="960" height="720" loading="lazy" decoding="async" />}
+    <div class="project-reveal"><span class="mono">VIEW PROJECT <Arrow /></span></div>
+  </div>
+  <div class="project-meta mono"><span>{project.projectId}</span>{project.year && <span>{project.year}</span>}</div>
+  <div class="project-title"><h3>{project.title}</h3><Arrow diagonal /></div>
+  <p class="project-categories mono">{project.category.join(' / ')}</p>
+</a>

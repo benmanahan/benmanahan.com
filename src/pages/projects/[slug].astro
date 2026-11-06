@@ -1,0 +1,48 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Footer from '../../components/Footer.astro';
+import Arrow from '../../components/Arrow.astro';
+import ProjectSection from '../../components/ProjectSection.astro';
+import { withBase } from '../../lib/paths';
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  const slugs = new Set<string>();
+  const ids = new Set<string>();
+  for (const { data } of projects) {
+    if (slugs.has(data.slug) || ids.has(data.projectId)) throw new Error(`Duplicate project slug or ID: ${data.slug}`);
+    slugs.add(data.slug); ids.add(data.projectId);
+  }
+  return projects.map((project, index) => ({ params: { slug: project.data.slug }, props: { project, next: projects.length > 1 ? projects[(index + 1) % projects.length] : undefined } }));
+}
+interface Props { project: CollectionEntry<'projects'>; next?: CollectionEntry<'projects'> }
+const { project, next } = Astro.props;
+const { data } = project;
+const hero = data.hero ?? data.thumbnail;
+const sections = data.sections.length > 0 ? data.sections : [{
+  title: 'Project overview',
+  paragraphs: [data.description],
+  media: hero ? {
+    type: 'image' as const,
+    src: hero,
+    alt: data.imageAlt!,
+    fit: 'contain' as const,
+    rotation: data.imageRotation,
+  } : { type: 'placeholder' as const },
+}];
+const hasSpecs = data.tools.length > 0 || data.githubUrl || data.videoUrl;
+const hasContent = Boolean(project.body?.trim());
+const { Content } = await render(project);
+---
+<BaseLayout title={`${data.title} — Ben Manahan`} description={data.description} noindex={data.placeholder}>
+  <header class="masthead shell detail-masthead"><a class="brand mono" href={withBase()} aria-label="Ben Manahan home">BM</a><nav aria-label="Project navigation" class="mono"><a href={withBase('#projects')}>SELECTED WORK <Arrow /></a><a href="#contact">CONTACT <Arrow diagonal /></a></nav></header>
+  <main id="main" class="project-detail shell">
+    <div class="section-kicker"><span>{data.projectId} / PROJECT STUDY</span>{data.year && <span>{data.year}</span>}</div>
+    <div class="detail-heading"><h1>{data.title}</h1><p>{data.description}</p></div>
+    <div class="detail-categories mono">{data.category.join(' / ')}</div>
+    <div class="project-story">{sections.map((section, index) => <ProjectSection section={section} index={index} projectId={data.projectId} />)}</div>
+    {(hasSpecs || hasContent) && <div class="case-study-layout">{hasSpecs && <aside class="project-specs"><span class="eyebrow mono">TOOLS & DISCIPLINES</span>{data.tools.length > 0 && <ul>{data.tools.map((tool) => <li>{tool}</li>)}</ul>}{(data.githubUrl || data.videoUrl) && <div class="project-resources">{data.githubUrl && <a class="text-link mono" href={data.githubUrl}>SOURCE CODE <Arrow diagonal /></a>}{data.videoUrl && <a class="text-link mono" href={data.videoUrl}>BUILD VIDEO <Arrow diagonal /></a>}</div>}</aside>}<article class="prose"><Content /></article></div>}
+    <nav class="project-pagination" aria-label="More projects"><a class="text-link mono" href={withBase('#projects')}>← BACK TO PROJECTS</a>{next && <a class="next-project" href={withBase(`projects/${next.data.slug}/`)}><span class="mono">NEXT PROJECT / {next.data.projectId}</span><span>{next.data.title}<Arrow /></span></a>}</nav>
+  </main>
+  <Footer />
+</BaseLayout>

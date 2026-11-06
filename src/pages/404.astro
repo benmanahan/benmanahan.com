@@ -1,0 +1,7 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/paths';
+---
+<BaseLayout title="Page not found — Ben Manahan" noindex>
+  <main id="main" class="not-found shell"><p class="eyebrow mono">404 / PAGE NOT FOUND</p><h1>A missing piece.</h1><p>This page may have moved, or the address may be incorrect.</p><a class="text-link mono" href={withBase()}>← BACK TO THE WORKBENCH</a></main>
+</BaseLayout>

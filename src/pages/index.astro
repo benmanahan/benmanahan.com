@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Arrow from '../components/Arrow.astro';
+import { site } from '../data/site';
+import { withBase } from '../lib/paths';
+const projects = (await getCollection('projects', ({ data }) => data.featured)).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout>
+  <header class="masthead shell">
+    <a class="brand mono" href={withBase()} aria-label="Ben Manahan home">BM</a>
+    <nav aria-label="Main navigation" class="mono"><a href="#projects">SELECTED WORK <span>01</span></a><a href="#about">ABOUT <span>02</span></a><a href="#contact">CONTACT <Arrow diagonal /></a></nav>
+  </header>
+  <main id="main">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">BEN<br />MANAHAN<span class="name-period">.</span></h1>
+        <p class="hero-intro">I love designing<br />and building things.</p>
+        <p class="hero-description">3D Modeling. Electronics.<br />A touch of Robotics.</p>
+      </div>
+      <figure class="portrait color-reveal" tabindex="0">
+        <div class="portrait-image"><img src={withBase(site.portrait.src)} alt={site.portrait.alt} width="720" height="900" fetchpriority="high" /></div>
+      </figure>
+    </section>
+    <section id="projects" class="projects-section shell" aria-labelledby="projects-title">
+      <div class="section-kicker"><h2 id="projects-title">01 / SELECTED WORK</h2></div>
+      <div class="project-grid">{projects.map((project) => <ProjectCard project={project} />)}</div>
+    </section>
+    <section id="about" class="about-section shell" aria-labelledby="about-title">
+      <div class="section-kicker"><span>02 / ABOUT</span></div>
+      <div class="about-layout"><h2 id="about-title">Always up for a<br />weeknight challenge.</h2><div class="about-copy"><p class="about-lead">I’ve been teaching myself electronics for the past three years, and I love making things in the physical world.</p><p>I graduated from Rutgers University with a BA in Political Science. I’ve worked in political campaigns, government, industry groups, and insurance. I love learning through failure, and electronics never disappoints.</p></div></div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

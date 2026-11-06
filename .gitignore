@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.env
+.env.*
+!.env.example
+npm-debug.log*
+# Keep original attachments private; the site uses metadata-free public web copies.
+src/assets/projects/
+# Temporary files created by macOS video export.
+*.sb-*
+# Local publishing reference.
+.local-notes/

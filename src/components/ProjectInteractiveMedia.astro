@@ -1,0 +1,76 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/paths';
+type Media = CollectionEntry<'projects'>['data']['sections'][number]['media'];
+interface Props { media: Extract<Media, { type: 'slideshow' | 'video' }>; index: number }
+const { media, index } = Astro.props;
+const clips = media.type === 'video' ? [media.src, ...media.playlist].map(withBase) : [];
+---
+<project-interactive-media
+  class="interactive-stage"
+  data-kind={media.type}
+  data-interval={media.type === 'slideshow' ? media.interval : undefined}
+  data-playlist={media.type === 'video' ? JSON.stringify(clips) : undefined}
+  data-clip-zooms={media.type === 'video' && media.clipZooms.length ? JSON.stringify(media.clipZooms) : undefined}
+  data-color="false"
+  role="group"
+  aria-label={media.type === 'video' ? `${media.label} Hover, tap, or press Enter to start.` : media.caption ?? 'Image slideshow'}
+  tabindex={media.type === 'video' ? '0' : undefined}
+>
+  {media.type === 'slideshow' && <>
+    <div class="slide-images">
+      {media.images.map((image, i) => <img
+        data-slide
+        data-current={String(i === 0)}
+        src={withBase(image.src)}
+        alt={image.alt}
+        style={`object-fit: ${media.fit};`}
+        width="960" height="720"
+        loading={index === 0 ? 'eager' : 'lazy'}
+        decoding="async"
+      />)}
+    </div>
+  </>}
+  {media.type === 'video' && <><video
+    muted playsinline
+    loop={clips.length === 1}
+    preload="none"
+    poster={media.poster ? withBase(media.poster) : undefined}
+    aria-label={media.label}
+    width="960" height="720"
+  >
+    <source data-src={clips[0]} type={media.src.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+    Your browser does not support this video. <a href={clips[0]}>Download the clip</a>.
+  </video>
+    <noscript><div class="video-fallback-links">{clips.map((src, i) => <a href={src}>Watch {media.clipLabels[i] ?? (clips.length > 1 ? `clip ${i + 1}` : 'video')}</a>)}</div></noscript>
+  </>}
+  {(media.type === 'slideshow' || clips.length > 1) && <div class="media-selectors" aria-label={media.type === 'video' ? 'Video version selector' : 'Image sequence controls'}>
+    {media.type === 'slideshow' && media.images.map((_, i) => <button type="button" data-select-slide aria-label={`Show image ${i + 1} and pause automatic rotation`} aria-pressed={i === 0}>{String(i + 1).padStart(2, '0')}</button>)}
+    {media.type === 'video' && clips.length > 1 && clips.map((_, i) => <button type="button" data-select-video aria-label={`Play ${media.clipLabels[i] ?? `clip ${i + 1}`}`} aria-pressed={i === 0}>{media.clipLabels[i] ?? String(i + 1).padStart(2, '0')}</button>)}
+  </div>}
+</project-interactive-media>
+
+<script>
+  import { registerProjectMedia } from '../scripts/project-media';
+  registerProjectMedia();
+</script>
+
+<style>
+  .interactive-stage { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+  .interactive-stage :is(img, video) { display: block; width: 100%; height: 100%; object-fit: contain; filter: grayscale(1); transition: filter 200ms ease; }
+  .interactive-stage[data-color="true"] :is(img, video) { filter: grayscale(0); }
+  .interactive-stage > video { object-fit: cover; }
+  .interactive-stage[data-kind="video"] { cursor: pointer; }
+  .slide-images { position: absolute; inset: 0; }
+  .slide-images img { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 200ms ease, filter 200ms ease, visibility 200ms ease; }
+  .slide-images img[data-current="true"] { opacity: 1; visibility: visible; }
+  .media-selectors { position: absolute; bottom: 12px; right: 12px; display: none; gap: 5px; }
+  .interactive-stage[data-ready="true"] .media-selectors { display: flex; }
+  .media-selectors button { min-width: 34px; min-height: 34px; padding: 6px 10px; border: 1px solid #575753; border-radius: 0; background: #090909e6; color: var(--text); font: 9px/1.4 var(--mono); cursor: pointer; }
+  .media-selectors button[aria-pressed="true"] { background: var(--text); color: var(--background); }
+  .media-selectors button:hover { border-color: var(--text); }
+  .video-fallback-links { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 12px; padding: 10px; background: #090909e6; font: 10px/1.5 var(--mono); }
+  .video-fallback-links a { text-decoration: underline; }
+  @media (pointer: coarse) { .media-selectors button { min-height: 44px; min-width: 44px; } }
+  @media (prefers-reduced-motion: reduce) { .interactive-stage :is(img, video) { transition: none; } }
+</style>

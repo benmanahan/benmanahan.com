@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/paths';
+import ProjectInteractiveMedia from './ProjectInteractiveMedia.astro';
+
+interface Props {
+  section: CollectionEntry<'projects'>['data']['sections'][number];
+  index: number;
+  projectId: string;
+}
+const { section, index, projectId } = Astro.props;
+const { media } = section;
+const number = String(index + 1).padStart(2, '0');
+const headingId = `${projectId.toLowerCase()}-section-${number}`;
+---
+<section class="story-section" aria-labelledby={headingId}>
+  <figure class:list={['story-media', { 'color-reveal': media.type !== 'placeholder' }]} tabindex={media.type === 'image' ? '0' : undefined}>
+    <div class="story-media-frame">
+      {media.type === 'image' && (
+        <img
+          class:list={['project-photo', { 'project-photo--rotated': Math.abs(media.rotation) === 90 }]}
+          style={`object-fit: ${media.fit}; --image-rotation: ${media.rotation}deg; --image-scale: ${media.zoom ?? (Math.abs(media.rotation) === 90 ? 1.2 : 1)};`}
+          src={withBase(media.src)}
+          alt={media.alt}
+          width="960"
+          height="720"
+          loading={index === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      )}
+      {(media.type === 'slideshow' || media.type === 'video') && <ProjectInteractiveMedia media={media} index={index} />}
+      {media.type === 'placeholder' && (
+        <div class="story-placeholder" role="img" aria-label={`${projectId} — numbered media placeholder ${number}`}>
+          <span class="mono">DEVELOPMENT MEDIA / {number}</span>
+          <span class="story-placeholder-number" aria-hidden="true">{number}</span>
+          <span class="mono">IMAGE OR SHORT VIDEO</span>
+        </div>
+      )}
+    </div>
+    <figcaption class="story-caption mono"><span>{projectId} / FIG. {number}</span><span>{media.caption ?? (media.type === 'placeholder' ? 'MEDIA TO BE ADDED' : '')}</span></figcaption>
+  </figure>
+  <div class="story-copy">
+    <p class="story-index mono">{number} / DEVELOPMENT</p>
+    <h2 id={headingId}>{section.title}</h2>
+    {section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+</section>

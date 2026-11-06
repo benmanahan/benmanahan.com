@@ -1,0 +1,34 @@
+---
+import { site } from '../data/site';
+import { withBase } from '../lib/paths';
+import Arrow from './Arrow.astro';
+const contacts = [
+  { label: 'LinkedIn', href: site.linkedin },
+];
+---
+<footer id="contact" class="site-footer shell">
+  <div class="section-kicker"><span>03 / CONTACT</span></div>
+  <div class="contact-main">
+    <h2>Let’s connect.</h2>
+    <div class="contact-links">
+      {site.email ? (
+        <details class="email-reveal">
+          <summary>Email<Arrow diagonal /></summary>
+          <div class="email-address">{site.email}</div>
+        </details>
+      ) : (
+        <span class="contact-placeholder">Email<span class="mono">TO BE ADDED</span></span>
+      )}
+      {contacts.map(({ label, href }) => href ? (
+        <a href={href}>{label}<Arrow diagonal /></a>
+      ) : (
+        <span class="contact-placeholder">{label}<span class="mono">TO BE ADDED</span></span>
+      ))}
+      {site.resume && <a href={withBase(site.resume)}>Résumé <Arrow diagonal /></a>}
+    </div>
+  </div>
+  <div class="footer-bottom mono">
+    <a href="#top">BACK TO TOP ↑</a>
+    <span>© {new Date().getFullYear()} BEN MANAHAN</span>
+  </div>
+</footer>
