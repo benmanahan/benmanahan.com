@@ -13,6 +13,6 @@ npm ci
 npm run dev
 ```
 
-Open [localhost:4321/benmanahan.com/](http://localhost:4321/benmanahan.com/).
+Open [localhost:4321](http://localhost:4321/).
 
 Run `npm run build` to create the production site.

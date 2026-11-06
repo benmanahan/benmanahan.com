@@ -1,10 +1,9 @@
 import { defineConfig } from 'astro/config';
 
-// Default to the repository's Pages URL; no custom domain or DNS change.
-// SITE_URL=https://benmanahan.com BASE_PATH=/ switches to a custom domain.
+// The portfolio is served from the root of its custom domain.
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://benmanahan.github.io',
-  base: process.env.BASE_PATH || '/benmanahan.com',
+  site: process.env.SITE_URL || 'https://benmanahan.com',
+  base: process.env.BASE_PATH || '/',
   output: 'static',
   trailingSlash: 'always',
   devToolbar: { enabled: false },

@@ -4,7 +4,8 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 
 const root = resolve('dist');
-const base = `/${(process.env.BASE_PATH || '/benmanahan.com').replace(/^\/+|\/+$/g, '')}`.replace(/\/$/, '');
+const base = `/${(process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '')}`.replace(/\/$/, '');
+const site = new URL(process.env.SITE_URL || 'https://benmanahan.com');
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   return (await Promise.all(entries.map((entry) => entry.isDirectory() ? walk(join(directory, entry.name)) : join(directory, entry.name)))).flat();
@@ -17,6 +18,9 @@ for (const file of htmlFiles) {
   const html = await readFile(file, 'utf8');
   assert.match(html, /<html lang="en">/, `${file}: language`);
   assert.match(html, /name="description"/, `${file}: SEO description`);
+  const canonical = html.match(/rel="canonical" href="([^"]+)"/);
+  assert.ok(canonical, `${file}: canonical URL`);
+  assert.equal(new URL(canonical[1]).origin, site.origin, `${file}: canonical must use the deployment domain`);
   assert.match(html, /id="main"/, `${file}: skip link destination`);
   assert.equal((html.match(/<h1[\s>]/g) || []).length, 1, `${file}: exactly one primary heading`);
   const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];

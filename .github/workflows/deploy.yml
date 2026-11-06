@@ -19,9 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ASTRO_TELEMETRY_DISABLED: '1'
-      # Keep these aligned with your Pages settings; defaults need no DNS changes.
-      SITE_URL: ${{ vars.SITE_URL || 'https://benmanahan.github.io' }}
-      BASE_PATH: ${{ vars.BASE_PATH || '/benmanahan.com' }}
+      # Publish assets and project links from the custom domain's root.
+      SITE_URL: 'https://benmanahan.com'
+      BASE_PATH: '/'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
