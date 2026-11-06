@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import Arrow from '../components/Arrow.astro';
 import { site } from '../data/site';
 import { withBase } from '../lib/paths';
 const projects = (await getCollection('projects', ({ data }) => data.featured)).sort((a, b) => a.data.order - b.data.order);
@@ -11,7 +10,7 @@ const projects = (await getCollection('projects', ({ data }) => data.featured)).
 <BaseLayout>
   <header class="masthead shell">
     <a class="brand mono" href={withBase()} aria-label="Ben Manahan home">BM</a>
-    <nav aria-label="Main navigation" class="mono"><a href="#projects">SELECTED WORK <span>01</span></a><a href="#about">ABOUT <span>02</span></a><a href="#contact">CONTACT <Arrow diagonal /></a></nav>
+    <nav aria-label="Main navigation" class="mono"><a href="#projects">SELECTED WORK <span>01</span></a><a href="#about">ABOUT <span>02</span></a><a href="#contact">CONTACT <span>03</span></a></nav>
   </header>
   <main id="main">
     <section class="hero shell" aria-labelledby="hero-title">
